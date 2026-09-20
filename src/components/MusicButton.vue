@@ -89,6 +89,7 @@ function toggle() {
 
 onUnmounted(() => {
   if (intervalId) clearInterval(intervalId);
+  if (audioCtx) audioCtx.close();
 });
 </script>
 

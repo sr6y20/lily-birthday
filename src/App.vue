@@ -132,11 +132,13 @@ function nl2br(str) {
   return str.replace(/\n/g, "<br>");
 }
 
+let makeVisible;
+
 onMounted(() => {
   checkMobile();
   window.addEventListener("resize", checkMobile);
 
-  const makeVisible = () => {
+  makeVisible = () => {
     document.querySelectorAll(".reveal").forEach(el => {
       const rect = el.getBoundingClientRect();
       if (rect.top < window.innerHeight && rect.bottom > 0) {
@@ -156,6 +158,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener("resize", checkMobile);
+  window.removeEventListener("scroll", makeVisible);
 });
 </script>
 
