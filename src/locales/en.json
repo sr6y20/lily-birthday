@@ -1,0 +1,41 @@
+{
+  "hero": {
+    "title": "Happy\nBirthday",
+    "subtitle": "Wishing you a wonderful day",
+    "date": "Reiwa 8 · Autumn"
+  },
+  "message": {
+    "title": "Heartfelt Wishes",
+    "p1": "On this special day,\nthank you for being born.",
+    "p2": "Your presence makes\nthis world brighter\nand warmer.",
+    "p3": "May the year ahead\nbe filled with\nsmiles and happiness.",
+    "signature": "— Lily —"
+  },
+  "wishes": [
+    { "icon": "🌸", "label": "Health & Peace", "desc": "May every day\nbe healthy and serene" },
+    { "icon": "✨", "label": "Dreams Come True", "desc": "May the future you envision\nunfold step by step" },
+    { "icon": "🌙", "label": "Beautiful Encounters", "desc": "May wonderful connections\ngrow around you" }
+  ],
+  "haiku": {
+    "title": "Autumn Birthday",
+    "line1": "Leaves dance and fall",
+    "line2": "Your smile shines bright",
+    "line3": "Season of joy"
+  },
+  "timeline": {
+    "title": "Special Moments",
+    "moment1": { "time": "Dawn", "text": "The beginning of a new year" },
+    "moment2": { "time": "Noon", "text": "Time with loved ones" },
+    "moment3": { "time": "Dusk", "text": "Reflecting on memories" },
+    "moment4": { "time": "Night", "text": "Wishes to the stars" }
+  },
+  "footer": {
+    "text": "Thank You",
+    "subtext": "for being in this world"
+  },
+  "lang": {
+    "zh": "中文",
+    "en": "EN",
+    "ja": "日本語"
+  }
+}

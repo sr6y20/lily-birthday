@@ -1,0 +1,41 @@
+{
+  "hero": {
+    "title": "生日快乐",
+    "subtitle": "Happy Birthday to You",
+    "date": "令和八年·秋"
+  },
+  "message": {
+    "title": "由衷的祝福",
+    "p1": "在这个特别的日子里，\n感谢你的降临。",
+    "p2": "你的存在，\n让这个世界更加明亮，\n更加温暖。",
+    "p3": "愿新的一年，\n充满笑容与幸福。",
+    "signature": "— Lily —"
+  },
+  "wishes": [
+    { "icon": "🌸", "label": "健康平安", "desc": "愿每一天\n都平安健康" },
+    { "icon": "✨", "label": "梦想成真", "desc": "愿心中的未来\n一步步实现" },
+    { "icon": "🌙", "label": "美好相遇", "desc": "愿与美好的人\n结下更多缘分" }
+  ],
+  "haiku": {
+    "title": "秋日生日",
+    "line1": "红叶舞飘落",
+    "line2": "你的笑容闪耀",
+    "line3": "幸福的季节"
+  },
+  "timeline": {
+    "title": "特别的时刻",
+    "moment1": { "time": "晨", "text": "新一年的开始" },
+    "moment2": { "time": "午", "text": "与重要的人共度" },
+    "moment3": { "time": "暮", "text": "回忆往昔时光" },
+    "moment4": { "time": "夜", "text": "向星辰许愿" }
+  },
+  "footer": {
+    "text": "谢谢你",
+    "subtext": "谢谢你来到这个世界"
+  },
+  "lang": {
+    "zh": "中文",
+    "en": "EN",
+    "ja": "日本語"
+  }
+}
