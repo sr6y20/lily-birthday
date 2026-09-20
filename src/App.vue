@@ -110,6 +110,8 @@
 <script setup>
 import { computed, onMounted, ref, onUnmounted, nextTick } from "vue";
 import { useI18n } from "vue-i18n";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import FireworksCanvas from "./components/FireworksCanvas.vue";
 import StarField from "./components/StarField.vue";
 import SakuraEffect from "./components/SakuraEffect.vue";
@@ -125,6 +127,8 @@ import Fireflies from "./components/Fireflies.vue";
 import MouseTrail from "./components/MouseTrail.vue";
 import ConfettiBurst from "./components/ConfettiBurst.vue";
 import FloatingWish from "./components/FloatingWish.vue";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const { t, tm } = useI18n();
 
@@ -145,7 +149,6 @@ function nl2br(str) {
 
 // Scroll chime sound
 let chimeCtx = null;
-const playedSections = new Set();
 
 function playScrollChime() {
   if (!chimeCtx) chimeCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -164,22 +167,7 @@ function playScrollChime() {
   osc.stop(chimeCtx.currentTime + 0.8);
 }
 
-// Parallax scrolling
-let onScroll;
-
 function onCakeAllBlown() {
-  // Trigger celebration fireworks
-  if (fireworksRef.value) {
-    const canvas = fireworksRef.value.$el;
-    if (canvas) {
-      const rect = canvas.getBoundingClientRect();
-      const cx = rect.width / 2;
-      const cy = rect.height / 2;
-      // Dispatch a custom event that FireworksCanvas can pick up
-      // Or we directly call burst if exposed
-    }
-  }
-  // Fallback: dispatch click event at center for fireworks
   const event = new MouseEvent("click", {
     clientX: window.innerWidth / 2,
     clientY: window.innerHeight / 2,
@@ -188,48 +176,63 @@ function onCakeAllBlown() {
   document.dispatchEvent(event);
 }
 
+let scrollTriggers = [];
+
 onMounted(() => {
   checkMobile();
   window.addEventListener("resize", checkMobile);
 
-  onScroll = () => {
-    // Reveal animation
-    document.querySelectorAll(".reveal").forEach(el => {
-      const rect = el.getBoundingClientRect();
-      if (rect.top < window.innerHeight && rect.bottom > 0) {
-        el.classList.add("visible");
-      }
-    });
-
-    // Parallax
-    document.querySelectorAll("[data-parallax]").forEach(el => {
-      const speed = parseFloat(el.dataset.parallax) || 0.1;
-      const yOffset = window.scrollY * speed;
-      el.style.transform = `translateY(${yOffset}px)`;
-    });
-
-    // Scroll chime for new sections
-    document.querySelectorAll("section").forEach((section, i) => {
-      const rect = section.getBoundingClientRect();
-      if (rect.top < window.innerHeight * 0.6 && rect.bottom > 0 && !playedSections.has(i)) {
-        playedSections.add(i);
-        playScrollChime();
-      }
-    });
-  };
-
   nextTick(() => {
-    onScroll();
-    setTimeout(onScroll, 300);
-    setTimeout(onScroll, 1000);
-  });
+    // Reveal animations with GSAP ScrollTrigger
+    gsap.utils.toArray(".reveal").forEach(el => {
+      gsap.fromTo(el,
+        { opacity: 0, y: 40 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 1,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: el,
+            start: "top 85%",
+            once: true,
+          },
+        }
+      );
+    });
 
-  window.addEventListener("scroll", onScroll, { passive: true });
+    // Parallax scrolling with GSAP
+    gsap.utils.toArray("[data-parallax]").forEach(el => {
+      const speed = parseFloat(el.dataset.parallax) || 0.1;
+      gsap.to(el, {
+        y: () => window.scrollY * speed,
+        ease: "none",
+        scrollTrigger: {
+          trigger: el,
+          start: "top bottom",
+          end: "bottom top",
+          scrub: true,
+        },
+      });
+    });
+
+    // Scroll chime per section
+    document.querySelectorAll("section").forEach(section => {
+      const st = ScrollTrigger.create({
+        trigger: section,
+        start: "top 60%",
+        once: true,
+        onEnter: () => playScrollChime(),
+      });
+      scrollTriggers.push(st);
+    });
+  });
 });
 
 onUnmounted(() => {
   window.removeEventListener("resize", checkMobile);
-  window.removeEventListener("scroll", onScroll);
+  ScrollTrigger.getAll().forEach(st => st.kill());
+  scrollTriggers = [];
   if (chimeCtx) chimeCtx.close();
 });
 </script>
