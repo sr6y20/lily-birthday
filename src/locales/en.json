@@ -45,5 +45,8 @@
   "wish": {
     "placeholder": "Write your wish...",
     "send": "Send"
+  },
+  "memory": {
+    "title": "Memories"
   }
 }

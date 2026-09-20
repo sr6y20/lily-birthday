@@ -45,5 +45,8 @@
   "wish": {
     "placeholder": "写下你的祝福...",
     "send": "发送"
+  },
+  "memory": {
+    "title": "回忆"
   }
 }

@@ -92,6 +92,9 @@
       </div>
     </section>
 
+    <!-- TODO: Memory Gallery - enable when images are ready -->
+    <!-- <MemoryGallery /> -->
+
     <section class="footer">
       <div class="reveal">
         <div class="footer-text">
@@ -127,6 +130,8 @@ import Fireflies from "./components/Fireflies.vue";
 import MouseTrail from "./components/MouseTrail.vue";
 import ConfettiBurst from "./components/ConfettiBurst.vue";
 import FloatingWish from "./components/FloatingWish.vue";
+// TODO: MemoryGallery - placeholder for future photo gallery
+// import MemoryGallery from "./components/MemoryGallery.vue";
 
 gsap.registerPlugin(ScrollTrigger);
 
