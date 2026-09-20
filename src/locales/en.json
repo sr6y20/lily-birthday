@@ -12,9 +12,21 @@
     "signature": "— Lily —"
   },
   "wishes": [
-    { "icon": "🌸", "label": "Health & Peace", "desc": "May every day\nbe healthy and serene" },
-    { "icon": "✨", "label": "Dreams Come True", "desc": "May the future you envision\nunfold step by step" },
-    { "icon": "🌙", "label": "Beautiful Encounters", "desc": "May wonderful connections\ngrow around you" }
+    {
+      "icon": "🌸",
+      "label": "Health & Peace",
+      "desc": "May every day\nbe healthy and serene"
+    },
+    {
+      "icon": "✨",
+      "label": "Dreams Come True",
+      "desc": "May the future you envision\nunfold step by step"
+    },
+    {
+      "icon": "🌙",
+      "label": "Beautiful Encounters",
+      "desc": "May wonderful connections\ngrow around you"
+    }
   ],
   "haiku": {
     "title": "Autumn Birthday",

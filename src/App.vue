@@ -156,7 +156,8 @@ function nl2br(str) {
 let chimeCtx = null;
 
 function playScrollChime() {
-  if (!chimeCtx) chimeCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (!chimeCtx)
+    chimeCtx = new (window.AudioContext || window.webkitAudioContext)();
   const notes = [659, 784, 880, 1047];
   const note = notes[Math.floor(Math.random() * notes.length)];
   const osc = chimeCtx.createOscillator();
@@ -190,7 +191,8 @@ onMounted(() => {
   nextTick(() => {
     // Reveal animations with GSAP ScrollTrigger
     gsap.utils.toArray(".reveal").forEach(el => {
-      gsap.fromTo(el,
+      gsap.fromTo(
+        el,
         { opacity: 0, y: 40 },
         {
           opacity: 1,
@@ -202,7 +204,7 @@ onMounted(() => {
             start: "top 85%",
             once: true,
           },
-        }
+        },
       );
     });
 

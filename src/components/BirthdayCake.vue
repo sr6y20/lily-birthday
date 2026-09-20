@@ -35,8 +35,10 @@
       </div>
       <div class="plate"></div>
     </div>
-    <div class="cake-hint" v-show="!allBlown">{{ t('cake.hint') }}</div>
-    <div class="cake-celebrate" v-show="allBlown">{{ t('cake.celebrate') }}</div>
+    <div class="cake-hint" v-show="!allBlown">{{ t("cake.hint") }}</div>
+    <div class="cake-celebrate" v-show="allBlown">
+      {{ t("cake.celebrate") }}
+    </div>
   </div>
 </template>
 
@@ -211,13 +213,19 @@ function blowCandle(index) {
   transform: translateX(-50%);
   width: 4px;
   height: 16px;
-  background: linear-gradient(to top, rgba(180,180,180,0.4), transparent);
+  background: linear-gradient(to top, rgba(180, 180, 180, 0.4), transparent);
   border-radius: 50%;
   animation: smokeRise 1.5s ease-out forwards;
 }
 @keyframes smokeRise {
-  0% { opacity: 0.6; transform: translateX(-50%) translateY(0) scaleX(1); }
-  100% { opacity: 0; transform: translateX(-50%) translateY(-20px) scaleX(2); }
+  0% {
+    opacity: 0.6;
+    transform: translateX(-50%) translateY(0) scaleX(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px) scaleX(2);
+  }
 }
 .cake-hint,
 .cake-celebrate {
