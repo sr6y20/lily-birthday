@@ -3,8 +3,16 @@
     <div class="cake-glow"></div>
     <div class="cake">
       <div class="candles">
-        <div v-for="i in 3" :key="i" class="candle" :class="{ tall: i === 2 }">
-          <div class="flame-wrapper"><div class="flame"></div></div>
+        <div
+          v-for="i in 3"
+          :key="i"
+          class="candle"
+          :class="{ tall: i === 2 }"
+          @click="blowCandle(i - 1)">
+          <div class="flame-wrapper" v-show="!blown[i - 1]">
+            <div class="flame"></div>
+          </div>
+          <div class="smoke" v-show="blown[i - 1]"></div>
         </div>
       </div>
       <div class="layer layer-top">
@@ -27,8 +35,29 @@
       </div>
       <div class="plate"></div>
     </div>
+    <div class="cake-hint" v-show="!allBlown">{{ t('cake.hint') }}</div>
+    <div class="cake-celebrate" v-show="allBlown">{{ t('cake.celebrate') }}</div>
   </div>
 </template>
+
+<script setup>
+import { ref, computed } from "vue";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
+const emit = defineEmits(["allBlown"]);
+const blown = ref([false, false, false]);
+
+const allBlown = computed(() => blown.value.every(Boolean));
+
+function blowCandle(index) {
+  if (blown.value[index]) return;
+  blown.value[index] = true;
+  if (allBlown.value) {
+    emit("allBlown");
+  }
+}
+</script>
 
 <style scoped>
 .cake-wrapper {
@@ -169,6 +198,42 @@
   background: linear-gradient(180deg, #fff5e0, #f0c27f);
   border-radius: 3px;
   position: relative;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.candle:hover {
+  filter: brightness(1.1);
+}
+.smoke {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 16px;
+  background: linear-gradient(to top, rgba(180,180,180,0.4), transparent);
+  border-radius: 50%;
+  animation: smokeRise 1.5s ease-out forwards;
+}
+@keyframes smokeRise {
+  0% { opacity: 0.6; transform: translateX(-50%) translateY(0) scaleX(1); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-20px) scaleX(2); }
+}
+.cake-hint,
+.cake-celebrate {
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  color: rgba(240, 194, 127, 0.5);
+  white-space: nowrap;
+  letter-spacing: 0.1em;
+  animation: fadeUp 1s ease forwards;
+}
+.cake-celebrate {
+  color: rgba(245, 166, 199, 0.7);
+  font-size: 0.9rem;
 }
 .candle.tall {
   height: 48px;

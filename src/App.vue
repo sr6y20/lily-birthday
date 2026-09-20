@@ -1,9 +1,13 @@
 <template>
   <div class="app">
     <WashiTexture />
-    <FireworksCanvas />
+    <FireworksCanvas ref="fireworksRef" />
     <StarField />
+    <ShootingStars />
     <SakuraEffect />
+    <Fireflies />
+    <MouseTrail />
+    <ConfettiBurst />
 
     <!-- Origami Cranes -->
     <OrigamiCrane
@@ -22,7 +26,7 @@
 
     <LangSwitcher />
 
-    <section class="hero">
+    <section class="hero" data-parallax="0.3">
       <ToriiGate />
       <div class="japanese-pattern top-left"></div>
       <div class="japanese-pattern top-right"></div>
@@ -36,13 +40,13 @@
       </div>
     </section>
 
-    <section class="cake-section">
+    <section class="cake-section" data-parallax="0.15">
       <div class="reveal">
-        <BirthdayCake />
+        <BirthdayCake @allBlown="onCakeAllBlown" />
       </div>
     </section>
 
-    <section class="haiku-section">
+    <section class="haiku-section" data-parallax="0.1">
       <div class="haiku-card reveal">
         <div class="haiku-kanji">歌</div>
         <h2 class="haiku-title">{{ t("haiku.title") }}</h2>
@@ -55,7 +59,7 @@
       </div>
     </section>
 
-    <section class="message-section">
+    <section class="message-section" data-parallax="0.1">
       <div class="message-card reveal">
         <h2 class="message-title">{{ t("message.title") }}</h2>
         <div class="message-text">
@@ -99,6 +103,7 @@
     </section>
 
     <MusicButton />
+    <FloatingWish />
   </div>
 </template>
 
@@ -115,6 +120,11 @@ import ToriiGate from "./components/ToriiGate.vue";
 import OrigamiCrane from "./components/OrigamiCrane.vue";
 import JapaneseLantern from "./components/JapaneseLantern.vue";
 import WashiTexture from "./components/WashiTexture.vue";
+import ShootingStars from "./components/ShootingStars.vue";
+import Fireflies from "./components/Fireflies.vue";
+import MouseTrail from "./components/MouseTrail.vue";
+import ConfettiBurst from "./components/ConfettiBurst.vue";
+import FloatingWish from "./components/FloatingWish.vue";
 
 const { t, tm } = useI18n();
 
@@ -122,6 +132,7 @@ const wishes = computed(() => tm("wishes"));
 
 const isMobile = ref(false);
 const craneCount = computed(() => (isMobile.value ? 3 : 5));
+const fireworksRef = ref(null);
 
 function checkMobile() {
   isMobile.value = window.innerWidth <= 600;
@@ -132,33 +143,94 @@ function nl2br(str) {
   return str.replace(/\n/g, "<br>");
 }
 
-let makeVisible;
+// Scroll chime sound
+let chimeCtx = null;
+const playedSections = new Set();
+
+function playScrollChime() {
+  if (!chimeCtx) chimeCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const notes = [659, 784, 880, 1047];
+  const note = notes[Math.floor(Math.random() * notes.length)];
+  const osc = chimeCtx.createOscillator();
+  const gain = chimeCtx.createGain();
+  osc.type = "sine";
+  osc.frequency.value = note;
+  gain.gain.setValueAtTime(0, chimeCtx.currentTime);
+  gain.gain.linearRampToValueAtTime(0.03, chimeCtx.currentTime + 0.02);
+  gain.gain.exponentialRampToValueAtTime(0.0001, chimeCtx.currentTime + 0.8);
+  osc.connect(gain);
+  gain.connect(chimeCtx.destination);
+  osc.start(chimeCtx.currentTime);
+  osc.stop(chimeCtx.currentTime + 0.8);
+}
+
+// Parallax scrolling
+let onScroll;
+
+function onCakeAllBlown() {
+  // Trigger celebration fireworks
+  if (fireworksRef.value) {
+    const canvas = fireworksRef.value.$el;
+    if (canvas) {
+      const rect = canvas.getBoundingClientRect();
+      const cx = rect.width / 2;
+      const cy = rect.height / 2;
+      // Dispatch a custom event that FireworksCanvas can pick up
+      // Or we directly call burst if exposed
+    }
+  }
+  // Fallback: dispatch click event at center for fireworks
+  const event = new MouseEvent("click", {
+    clientX: window.innerWidth / 2,
+    clientY: window.innerHeight / 2,
+    bubbles: true,
+  });
+  document.dispatchEvent(event);
+}
 
 onMounted(() => {
   checkMobile();
   window.addEventListener("resize", checkMobile);
 
-  makeVisible = () => {
+  onScroll = () => {
+    // Reveal animation
     document.querySelectorAll(".reveal").forEach(el => {
       const rect = el.getBoundingClientRect();
       if (rect.top < window.innerHeight && rect.bottom > 0) {
         el.classList.add("visible");
       }
     });
+
+    // Parallax
+    document.querySelectorAll("[data-parallax]").forEach(el => {
+      const speed = parseFloat(el.dataset.parallax) || 0.1;
+      const yOffset = window.scrollY * speed;
+      el.style.transform = `translateY(${yOffset}px)`;
+    });
+
+    // Scroll chime for new sections
+    document.querySelectorAll("section").forEach((section, i) => {
+      const rect = section.getBoundingClientRect();
+      if (rect.top < window.innerHeight * 0.6 && rect.bottom > 0 && !playedSections.has(i)) {
+        playedSections.add(i);
+        playScrollChime();
+      }
+    });
   };
 
   nextTick(() => {
-    makeVisible();
-    setTimeout(makeVisible, 300);
-    setTimeout(makeVisible, 1000);
+    onScroll();
+    setTimeout(onScroll, 300);
+    setTimeout(onScroll, 1000);
   });
 
-  window.addEventListener("scroll", makeVisible, { passive: true });
+  window.addEventListener("scroll", onScroll, { passive: true });
 });
 
 onUnmounted(() => {
   window.removeEventListener("resize", checkMobile);
-  window.removeEventListener("scroll", makeVisible);
+  window.removeEventListener("scroll", onScroll);
+  if (chimeCtx) chimeCtx.close();
 });
 </script>
 

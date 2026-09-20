@@ -37,5 +37,13 @@
     "zh": "中文",
     "en": "EN",
     "ja": "日本語"
+  },
+  "cake": {
+    "hint": "Click candles to blow them out",
+    "celebrate": "✨ Congratulations! ✨"
+  },
+  "wish": {
+    "placeholder": "Write your wish...",
+    "send": "Send"
   }
 }

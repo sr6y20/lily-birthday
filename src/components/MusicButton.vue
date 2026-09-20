@@ -18,6 +18,7 @@ import { ref, onUnmounted } from "vue";
 const playing = ref(false);
 let audioCtx = null;
 let intervalId = null;
+let ambientId = null;
 
 const melody = [
   { note: 262, dur: 0.3 },
@@ -47,19 +48,42 @@ const melody = [
   { note: 349, dur: 1.2 },
 ];
 
-function playNote(freq, startTime, duration) {
+// Wind chime / bell ambient notes (pentatonic scale)
+const ambientNotes = [523, 659, 784, 880, 1047, 1175, 784, 659];
+
+function playNote(freq, startTime, duration, volume = 0.08) {
   if (!audioCtx) return;
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
   osc.type = "sine";
   osc.frequency.value = freq;
   gain.gain.setValueAtTime(0, startTime);
-  gain.gain.linearRampToValueAtTime(0.08, startTime + 0.05);
+  gain.gain.linearRampToValueAtTime(volume, startTime + 0.05);
   gain.gain.linearRampToValueAtTime(0, startTime + duration);
   osc.connect(gain);
   gain.connect(audioCtx.destination);
   osc.start(startTime);
   osc.stop(startTime + duration);
+}
+
+function playBell(freq, startTime) {
+  if (!audioCtx) return;
+  // Bell-like: fundamental + harmonics
+  const harmonics = [1, 2.0, 3.0, 4.2];
+  const volumes = [0.04, 0.02, 0.01, 0.005];
+  harmonics.forEach((ratio, i) => {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = "sine";
+    osc.frequency.value = freq * ratio;
+    gain.gain.setValueAtTime(0, startTime);
+    gain.gain.linearRampToValueAtTime(volumes[i], startTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 2.5);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(startTime);
+    osc.stop(startTime + 2.5);
+  });
 }
 
 function playMelody() {
@@ -72,6 +96,13 @@ function playMelody() {
   return t - audioCtx.currentTime;
 }
 
+function playAmbientChime() {
+  if (!audioCtx || !playing.value) return;
+  const note = ambientNotes[Math.floor(Math.random() * ambientNotes.length)];
+  playBell(note, audioCtx.currentTime);
+  ambientId = setTimeout(playAmbientChime, Math.random() * 3000 + 2000);
+}
+
 function toggle() {
   playing.value = !playing.value;
   if (playing.value) {
@@ -81,14 +112,19 @@ function toggle() {
     intervalId = setInterval(() => {
       if (playing.value) playMelody();
     }, dur * 1000);
+    // Start ambient chimes
+    setTimeout(playAmbientChime, 1500);
   } else {
     if (intervalId) clearInterval(intervalId);
+    if (ambientId) clearTimeout(ambientId);
     intervalId = null;
+    ambientId = null;
   }
 }
 
 onUnmounted(() => {
   if (intervalId) clearInterval(intervalId);
+  if (ambientId) clearTimeout(ambientId);
   if (audioCtx) audioCtx.close();
 });
 </script>
