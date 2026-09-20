@@ -312,8 +312,9 @@ section {
 .scroll-hint {
   position: absolute;
   bottom: 40px;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -337,10 +338,10 @@ section {
 @keyframes bounce {
   0%,
   100% {
-    transform: rotate(45deg) translateY(0);
+    transform: translateY(0) rotate(45deg);
   }
   50% {
-    transform: rotate(45deg) translateY(8px);
+    transform: translateY(8px) rotate(45deg);
   }
 }
 @keyframes fadeUp {
@@ -372,8 +373,9 @@ section {
   );
 }
 .message-card {
-  max-width: 600px;
-  padding: 50px 40px;
+  width: 90%;
+  max-width: 900px;
+  padding: 50px 20px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(240, 194, 127, 0.15);
   border-radius: 24px;
@@ -511,8 +513,9 @@ section {
   );
 }
 .haiku-card {
-  max-width: 500px;
-  padding: 60px 50px;
+  width: 85%;
+  max-width: 900px;
+  padding: 60px 40px;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(240, 194, 127, 0.1);
   border-radius: 24px;
@@ -725,13 +728,6 @@ section {
   .lang-switcher button {
     padding: 5px 10px;
     font-size: 0.7rem;
-  }
-
-  .music-btn {
-    bottom: 20px;
-    right: 20px;
-    width: 42px;
-    height: 42px;
   }
 
   .haiku-card {

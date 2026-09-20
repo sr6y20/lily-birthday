@@ -1,11 +1,14 @@
 <template>
   <button class="music-btn" :class="{ paused: !playing }" @click="toggle">
-    <div class="bars">
-      <div class="bar"></div>
-      <div class="bar"></div>
-      <div class="bar"></div>
-      <div class="bar"></div>
-    </div>
+    <svg
+      class="note"
+      :class="{ spinning: playing }"
+      viewBox="0 0 24 24"
+      fill="#f0c27f"
+      xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M12 3v10.55c-.59-.34-1.27-.55-2-.55C7.79 13 6 14.79 6 17s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
+    </svg>
   </button>
 </template>
 
@@ -95,8 +98,8 @@ onUnmounted(() => {
   bottom: 30px;
   right: 30px;
   z-index: 20;
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   border: 1px solid rgba(240, 194, 127, 0.3);
   background: rgba(10, 10, 26, 0.8);
@@ -111,46 +114,30 @@ onUnmounted(() => {
   border-color: #f0c27f;
   box-shadow: 0 0 20px rgba(240, 194, 127, 0.2);
 }
-.bars {
-  display: flex;
-  gap: 3px;
-  align-items: center;
-  height: 18px;
+.note {
+  width: 55%;
+  height: 55%;
+  display: block;
+  transition: transform 0.3s;
+  opacity: 0.4;
 }
-.bar {
-  width: 3px;
-  background: #f0c27f;
-  border-radius: 2px;
-  animation: musicBar 0.8s ease-in-out infinite;
+.music-btn:not(.paused) .note {
+  opacity: 1;
 }
-.bar:nth-child(1) {
-  height: 8px;
-  animation-delay: 0s;
+.note.spinning {
+  animation: noteSwing 1.5s ease-in-out infinite;
 }
-.bar:nth-child(2) {
-  height: 14px;
-  animation-delay: 0.2s;
-}
-.bar:nth-child(3) {
-  height: 10px;
-  animation-delay: 0.4s;
-}
-.bar:nth-child(4) {
-  height: 16px;
-  animation-delay: 0.1s;
-}
-.paused .bar {
-  animation-play-state: paused;
-  height: 3px;
+.paused .note {
+  opacity: 0.3;
 }
 
-@keyframes musicBar {
+@keyframes noteSwing {
   0%,
   100% {
-    transform: scaleY(1);
+    transform: rotate(-10deg) scale(1);
   }
   50% {
-    transform: scaleY(0.4);
+    transform: rotate(10deg) scale(1.15);
   }
 }
 </style>
