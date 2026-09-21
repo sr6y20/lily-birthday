@@ -11,10 +11,21 @@
 </template>
 
 <script setup>
+import { watch } from "vue";
 import { useI18n } from "vue-i18n";
 
 const { t, locale } = useI18n();
 const langs = ["ja", "zh", "en"];
+
+// SEO/无障碍：html lang 与文档标题跟随当前语言。
+watch(
+  locale,
+  code => {
+    document.documentElement.lang = code;
+    document.title = t("hero.docTitle");
+  },
+  { immediate: true },
+);
 
 function switchLang(code) {
   locale.value = code;

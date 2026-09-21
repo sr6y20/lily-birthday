@@ -2,7 +2,8 @@
   "hero": {
     "title": "生日快乐",
     "subtitle": "Happy Birthday to You",
-    "date": "令和{year}年·二月二十六日"
+    "date": "令和{year}年·{monthDay}",
+    "docTitle": "生日快乐 🎂 生日贺卡与纪念卡"
   },
   "message": {
     "title": "由衷的祝福",
@@ -11,11 +12,27 @@
     "p3": "愿新的一年，\n充满笑容与幸福。",
     "signature": "— Lily —"
   },
-  "wishes": [
-    { "icon": "🌸", "label": "健康平安", "desc": "愿每一天\n都平安健康" },
-    { "icon": "✨", "label": "梦想成真", "desc": "愿心中的未来\n一步步实现" },
-    { "icon": "🌙", "label": "美好相遇", "desc": "愿与美好的人\n结下更多缘分" }
-  ],
+  "wishes": {
+    "title": "心愿",
+    "hint": "点击卡片翻阅祝福",
+    "items": [
+      {
+        "icon": "🌸",
+        "label": "健康平安",
+        "desc": "愿每一天\n都平安健康"
+      },
+      {
+        "icon": "✨",
+        "label": "梦想成真",
+        "desc": "愿心中的未来\n一步步实现"
+      },
+      {
+        "icon": "🌙",
+        "label": "美好相遇",
+        "desc": "愿与美好的人\n结下更多缘分"
+      }
+    ]
+  },
   "haiku": {
     "title": "冬日生日",
     "line1": "梅花含苞待放",
@@ -24,14 +41,38 @@
   },
   "timeline": {
     "title": "特别的时刻",
-    "moment1": { "time": "晨", "text": "新一年的开始" },
-    "moment2": { "time": "午", "text": "与重要的人共度" },
-    "moment3": { "time": "暮", "text": "回忆往昔时光" },
-    "moment4": { "time": "夜", "text": "向星辰许愿" }
+    "moment1": {
+      "time": "晨",
+      "text": "新一年的开始"
+    },
+    "moment2": {
+      "time": "午",
+      "text": "与重要的人共度"
+    },
+    "moment3": {
+      "time": "暮",
+      "text": "回忆往昔时光"
+    },
+    "moment4": {
+      "time": "夜",
+      "text": "向星辰许愿"
+    }
   },
   "footer": {
-    "text": "谢谢你",
-    "subtext": "谢谢你来到这个世界"
+    "text": "新的一年，愿你被世界温柔以待",
+    "subtext": "生日快乐"
+  },
+  "letter": {
+    "journeyHint": "这颗星，会把你的祝福送到最后。",
+    "delivery": "星星捎来了一封信",
+    "carrying": "随信附上：{wish}",
+    "open": "拆开这封生日信",
+    "close": "把信收好",
+    "title": "写给今天的你",
+    "salutation": "亲爱的你：",
+    "p1": "想把今天的最后一点星光，留在这封信里，送给你。很高兴，这个世界有你。",
+    "p2": "新的一岁，不必急着成为谁。愿你能好好吃饭、安心睡觉，也有余力去做让自己开心的事。偶尔觉得累的时候，就慢一点。",
+    "p3": "愿那些小小的期待，慢慢长成你喜欢的日子。生日快乐，愿下一次回望时，你会喜欢这一岁的自己。"
   },
   "lang": {
     "zh": "中文",
@@ -42,9 +83,13 @@
     "hint": "点击蜡烛吹灭它们",
     "celebrate": "✨ 恭喜恭喜！ ✨"
   },
-  "wish": {
-    "placeholder": "写下你的祝福...",
-    "send": "发送"
+  "keepsake": {
+    "title": "生日纪念",
+    "reopen": "再次展开",
+    "save": "保存图片",
+    "saving": "正在生成图片…",
+    "saved": "PNG 已生成，请在下载中查看。",
+    "error": "图片生成失败，请重试。"
   },
   "memory": {
     "title": "回忆"

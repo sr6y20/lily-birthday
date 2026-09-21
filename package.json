@@ -9,6 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fontsource/noto-serif-jp": "^5.3.0",
+    "@fontsource/zen-maru-gothic": "^5.3.0",
     "gsap": "^3.15.0",
     "vue": "^3.5.0",
     "vue-i18n": "^9.14.0"

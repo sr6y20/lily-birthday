@@ -2,7 +2,8 @@
   "hero": {
     "title": "Happy\nBirthday",
     "subtitle": "Wishing you a wonderful day",
-    "date": "Reiwa {year} · February 26"
+    "date": "Reiwa {year} · {monthDay}",
+    "docTitle": "Happy Birthday 🎂 Interactive Birthday Wish Card"
   },
   "message": {
     "title": "Heartfelt Wishes",
@@ -11,23 +12,27 @@
     "p3": "May the year ahead\nbe filled with\nsmiles and happiness.",
     "signature": "— Lily —"
   },
-  "wishes": [
-    {
-      "icon": "🌸",
-      "label": "Health & Peace",
-      "desc": "May every day\nbe healthy and serene"
-    },
-    {
-      "icon": "✨",
-      "label": "Dreams Come True",
-      "desc": "May the future you envision\nunfold step by step"
-    },
-    {
-      "icon": "🌙",
-      "label": "Beautiful Encounters",
-      "desc": "May wonderful connections\ngrow around you"
-    }
-  ],
+  "wishes": {
+    "title": "Wishes",
+    "hint": "Tap to flip through wishes",
+    "items": [
+      {
+        "icon": "🌸",
+        "label": "Health & Peace",
+        "desc": "May every day\nbe healthy and serene"
+      },
+      {
+        "icon": "✨",
+        "label": "Dreams Come True",
+        "desc": "May the future you envision\nunfold step by step"
+      },
+      {
+        "icon": "🌙",
+        "label": "Beautiful Encounters",
+        "desc": "May wonderful connections\ngrow around you"
+      }
+    ]
+  },
   "haiku": {
     "title": "Winter Birthday",
     "line1": "Plum blossoms await",
@@ -36,14 +41,38 @@
   },
   "timeline": {
     "title": "Special Moments",
-    "moment1": { "time": "Dawn", "text": "The beginning of a new year" },
-    "moment2": { "time": "Noon", "text": "Time with loved ones" },
-    "moment3": { "time": "Dusk", "text": "Reflecting on memories" },
-    "moment4": { "time": "Night", "text": "Wishes to the stars" }
+    "moment1": {
+      "time": "Dawn",
+      "text": "The beginning of a new year"
+    },
+    "moment2": {
+      "time": "Noon",
+      "text": "Time with loved ones"
+    },
+    "moment3": {
+      "time": "Dusk",
+      "text": "Reflecting on memories"
+    },
+    "moment4": {
+      "time": "Night",
+      "text": "Wishes to the stars"
+    }
   },
   "footer": {
-    "text": "Thank You",
-    "subtext": "for being in this world"
+    "text": "May the new year treat you gently",
+    "subtext": "Happy Birthday"
+  },
+  "letter": {
+    "journeyHint": "This little star will carry your wish to the end.",
+    "delivery": "A letter, delivered by a star",
+    "carrying": "Enclosed with love: {wish}",
+    "open": "Open your birthday letter",
+    "close": "Tuck the letter away",
+    "title": "For you, on your birthday",
+    "salutation": "Dear you,",
+    "p1": "I wanted to save a little of today's starlight in this letter, just for you. I'm so glad you're here in the world.",
+    "p2": "This year, there's no hurry to become someone else. I hope you eat well, sleep peacefully, and make time for things that make you happy. When you're tired, it's okay to slow down.",
+    "p3": "May your small hopes grow into days you love. Happy birthday. When you look back on this year, I hope you'll be fond of the person you were along the way."
   },
   "lang": {
     "zh": "中文",
@@ -54,9 +83,13 @@
     "hint": "Click candles to blow them out",
     "celebrate": "✨ Congratulations! ✨"
   },
-  "wish": {
-    "placeholder": "Write your wish...",
-    "send": "Send"
+  "keepsake": {
+    "title": "Birthday keepsake",
+    "reopen": "Read again",
+    "save": "Save image",
+    "saving": "Preparing image…",
+    "saved": "PNG generated. Check your downloads.",
+    "error": "Couldn't create the image. Please try again."
   },
   "memory": {
     "title": "Memories"

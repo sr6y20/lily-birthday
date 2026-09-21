@@ -1,5 +1,5 @@
 <template>
-  <div class="app">
+  <div class="app" ref="appRef" :data-wish="wishes[0]?.id">
     <WashiTexture />
     <FireworksCanvas ref="fireworksRef" />
     <StarField />
@@ -32,7 +32,7 @@
       <div class="japanese-pattern top-right"></div>
       <h1 class="hero-kanji" v-html="nl2br(t('hero.title'))"></h1>
       <p class="hero-sub">{{ t("hero.subtitle") }}</p>
-      <p class="hero-date">{{ t("hero.date", { year: reiwaYear }) }}</p>
+      <p class="hero-date">{{ t("hero.date", dateParams) }}</p>
       <div class="hero-line"></div>
       <div class="scroll-hint">
         <span>SCROLL</span>
@@ -72,16 +72,56 @@
     </section>
 
     <section class="wishes-section">
-      <div class="wishes-grid">
-        <div v-for="(wish, i) in wishes" :key="i" class="wish-card reveal">
-          <span class="wish-icon">{{ wish.icon }}</span>
-          <div class="wish-label">{{ wish.label }}</div>
-          <div class="wish-desc" v-html="nl2br(wish.desc)"></div>
-        </div>
+      <div class="journey-marker journey-marker--start" aria-hidden="true">
+        <svg class="journey-spark" viewBox="0 0 100 100" focusable="false">
+          <path
+            class="journey-spark-base"
+            d="M50 4 62 35 96 38 70 60 78 94 50 76 22 94 30 60 4 38 38 35Z" />
+          <path
+            class="journey-spark-fold"
+            d="M50 4 50 52 4 38 38 35ZM50 52 78 94 50 76 22 94ZM50 52 96 38 70 60Z" />
+          <path
+            class="journey-spark-crease"
+            d="M50 4V52L22 94M4 38 50 52 96 38M50 52 78 94" />
+          <text class="journey-spark-symbol" x="50" y="61" text-anchor="middle">
+            {{ wishes[0]?.icon }}
+          </text>
+        </svg>
       </div>
+      <h2 class="wishes-title">{{ t("wishes.title") }}</h2>
+      <button
+        ref="wishSlider"
+        class="wish-slider"
+        type="button"
+        :aria-label="t('wishes.hint')"
+        aria-describedby="current-wish-label current-wish-desc"
+        @click="flipWish">
+        <span
+          v-for="(wish, position) in wishes"
+          :key="wish.id"
+          class="wish-card"
+          :aria-hidden="position !== 0">
+          <span class="wish-icon" aria-hidden="true">{{ wish.icon }}</span>
+          <span
+            :id="position === 0 ? 'current-wish-label' : undefined"
+            class="wish-label"
+            >{{ wish.label }}</span
+          >
+          <span
+            :id="position === 0 ? 'current-wish-desc' : undefined"
+            class="wish-desc"
+            >{{ wish.desc }}</span
+          >
+        </span>
+      </button>
+      <p class="wish-hint">{{ t("wishes.hint") }}</p>
+      <p class="journey-hint">{{ t("letter.journeyHint") }}</p>
     </section>
 
     <section class="timeline-section">
+      <div
+        class="journey-marker journey-marker--middle"
+        aria-hidden="true"></div>
       <h2 class="timeline-title reveal">{{ t("timeline.title") }}</h2>
       <div class="timeline">
         <div class="timeline-item reveal" v-for="i in 4" :key="i">
@@ -96,6 +136,118 @@
     <!-- <MemoryGallery /> -->
 
     <section class="footer">
+      <div class="birthday-delivery">
+        <p class="delivery-caption">{{ t("letter.delivery") }}</p>
+        <button
+          ref="envelopeButton"
+          class="envelope-button"
+          type="button"
+          :aria-expanded="letterOpen"
+          aria-controls="birthday-letter"
+          @click="letterOpen ? closeLetter() : openLetter()">
+          <span
+            class="journey-marker journey-marker--end"
+            aria-hidden="true"></span>
+          <span class="envelope-art" aria-hidden="true">
+            <span class="envelope-note"></span>
+            <span class="envelope-flap"></span>
+            <span class="envelope-stamp">{{ wishes[0]?.icon }}</span>
+          </span>
+          <span class="envelope-action">
+            {{ t(letterOpen ? "letter.close" : "letter.open") }}
+          </span>
+        </button>
+        <p class="delivery-wish">
+          {{ t("letter.carrying", { wish: wishes[0]?.label }) }}
+        </p>
+      </div>
+      <Transition
+        :css="false"
+        @enter="(el, done) => animateLetter(el, done, true)"
+        @leave="(el, done) => animateLetter(el, done, false)"
+        @enter-cancelled="cancelLetterAnimation"
+        @leave-cancelled="cancelLetterAnimation"
+        @after-leave="showKeepsake">
+        <article
+          v-show="letterOpen"
+          id="birthday-letter"
+          class="birthday-letter"
+          :class="{ 'is-folding': !letterOpen }"
+          :inert="!letterOpen"
+          :aria-hidden="!letterOpen"
+          aria-labelledby="birthday-letter-title">
+          <p class="letter-date">{{ t("hero.date", dateParams) }}</p>
+          <h2 id="birthday-letter-title">{{ t("letter.title") }}</h2>
+          <p class="letter-line letter-salutation">
+            {{ t("letter.salutation") }}
+          </p>
+          <p v-for="i in 3" :key="i" class="letter-line letter-paragraph">
+            {{ t(`letter.p${i}`) }}
+          </p>
+          <blockquote class="letter-line letter-keepsake">
+            {{ wishes[0]?.desc }}
+          </blockquote>
+          <p class="letter-line letter-signature">
+            {{ t("message.signature") }}
+          </p>
+          <svg
+            ref="letterMotif"
+            class="letter-motif"
+            viewBox="0 0 360 120"
+            aria-hidden="true">
+            <path
+              v-for="(d, i) in wishMotif.strokes"
+              :key="`line-${wishes[0].id}-${i}`"
+              class="motif-line"
+              :d="d" />
+            <path
+              v-for="(d, i) in wishMotif.accents"
+              :key="`accent-${wishes[0].id}-${i}`"
+              class="motif-accent"
+              :d="d" />
+          </svg>
+          <button class="letter-close" type="button" @click="closeLetter">
+            {{ t("letter.close") }}
+          </button>
+        </article>
+      </Transition>
+      <div
+        v-show="keepsakeVisible && !letterOpen"
+        ref="keepsakePanel"
+        class="keepsake-panel"
+        :inert="!keepsakeVisible || letterOpen">
+        <article class="keepsake-card" aria-labelledby="keepsake-title">
+          <p class="keepsake-eyebrow">{{ t("keepsake.title") }}</p>
+          <p class="keepsake-date">{{ t("hero.date", dateParams) }}</p>
+          <svg class="keepsake-motif" viewBox="0 0 360 120" aria-hidden="true">
+            <path
+              v-for="(d, i) in wishMotif.strokes"
+              :key="`line-${i}`"
+              class="motif-line"
+              :d="d" />
+            <path
+              v-for="(d, i) in wishMotif.accents"
+              :key="`accent-${i}`"
+              class="motif-accent"
+              :d="d" />
+          </svg>
+          <h2 id="keepsake-title">{{ wishes[0]?.label }}</h2>
+          <p class="keepsake-description">{{ wishes[0]?.desc }}</p>
+          <p class="keepsake-signature">{{ t("message.signature") }}</p>
+          <p class="keepsake-greeting">{{ t("footer.subtext") }}</p>
+        </article>
+        <div class="keepsake-actions">
+          <button ref="reopenButton" type="button" @click="openLetter">
+            {{ t("keepsake.reopen") }}
+          </button>
+          <button type="button" :disabled="isSaving" @click="saveKeepsake">
+            {{ t(isSaving ? "keepsake.saving" : "keepsake.save") }}
+          </button>
+        </div>
+        <p class="keepsake-status" role="status" aria-live="polite">
+          {{ exportStatus ? t(`keepsake.${exportStatus}`) : "" }}
+        </p>
+      </div>
       <div class="reveal">
         <div class="footer-text">
           {{ t("footer.text") }}<br />
@@ -106,15 +258,16 @@
     </section>
 
     <MusicButton />
-    <FloatingWish />
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, ref, onUnmounted, nextTick } from "vue";
+import { computed, onMounted, ref, onUnmounted, nextTick, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { Flip } from "gsap/Flip";
+import { DrawSVGPlugin } from "gsap/DrawSVGPlugin";
 import FireworksCanvas from "./components/FireworksCanvas.vue";
 import StarField from "./components/StarField.vue";
 import SakuraEffect from "./components/SakuraEffect.vue";
@@ -129,21 +282,472 @@ import ShootingStars from "./components/ShootingStars.vue";
 import Fireflies from "./components/Fireflies.vue";
 import MouseTrail from "./components/MouseTrail.vue";
 import ConfettiBurst from "./components/ConfettiBurst.vue";
-import FloatingWish from "./components/FloatingWish.vue";
+import "./App.css";
 // TODO: MemoryGallery - placeholder for future photo gallery
 // import MemoryGallery from "./components/MemoryGallery.vue";
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, Flip, DrawSVGPlugin);
 
-const { t, tm } = useI18n();
+const { t, tm, locale } = useI18n();
 
 const currentYear = new Date().getFullYear();
-const reiwaYear = currentYear - 2018;
-const wishes = computed(() => tm("wishes"));
+
+// 生日日期支持地址栏传参：?date=2-26 或 ?date=2027-2-26，缺省 2 月 26 日。
+const CN_NUMS = "〇一二三四五六七八九";
+const CN_MONTHS = [
+  "正",
+  "二",
+  "三",
+  "四",
+  "五",
+  "六",
+  "七",
+  "八",
+  "九",
+  "十",
+  "十一",
+  "十二",
+];
+const EN_MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+const cnNum = n =>
+  n < 10
+    ? CN_NUMS[n]
+    : n < 20
+      ? "十" + (n % 10 ? CN_NUMS[n % 10] : "")
+      : CN_NUMS[Math.floor(n / 10)] + "十" + (n % 10 ? CN_NUMS[n % 10] : "");
+const ordinal = n => {
+  const last2 = n % 100;
+  if (last2 >= 11 && last2 <= 13) return n + "th";
+  return n + ({ 1: "st", 2: "nd", 3: "rd" }[n % 10] || "th");
+};
+const birthdayDate = computed(() => {
+  const parts = (
+    new URLSearchParams(window.location.search).get("date") || ""
+  ).match(/^(?:(\d{4})-)?(\d{1,2})-(\d{1,2})$/);
+  const year = parts ? +(parts[1] || currentYear) : currentYear;
+  const month = parts ? +parts[2] : 2;
+  const day = parts ? +parts[3] : 26;
+  if (
+    !parts ||
+    month < 1 ||
+    month > 12 ||
+    day < 1 ||
+    day > 31 ||
+    !Number.isFinite(year)
+  ) {
+    return null;
+  }
+  const d = new Date(year, month - 1, day);
+  if (
+    d.getFullYear() !== year ||
+    d.getMonth() !== month - 1 ||
+    d.getDate() !== day
+  ) {
+    return null;
+  }
+  return {
+    reiwa: year - 2018,
+    cn: `${CN_MONTHS[month - 1]}月${cnNum(day)}日`,
+    en: `${EN_MONTHS[month - 1]} ${ordinal(day)}`,
+  };
+});
+const reiwaYear = computed(
+  () => birthdayDate.value?.reiwa ?? currentYear - 2018,
+);
+const dateParams = computed(() => ({
+  year: reiwaYear.value,
+  monthDay:
+    locale.value === "en"
+      ? birthdayDate.value?.en || "February 26"
+      : birthdayDate.value?.cn || "二月二十六日",
+}));
+const wishIndex = ref(0);
+const wishes = computed(() => {
+  const items = tm("wishes.items") || [];
+  return items.map((_, position) => {
+    const id = (wishIndex.value + position) % items.length;
+    return { ...items[id], id };
+  });
+});
+// 同一组路径供信末描画、纪念卡与 PNG 导出使用。
+const motifVariants = [
+  {
+    strokes: [
+      "M25 104C100 91 184 53 324 27",
+      "M102 85Q91 62 70 43",
+      "M174 60Q180 40 201 22",
+      "M242 43Q262 63 291 70",
+    ],
+    accents: [
+      "M70 43C49 44 47 28 62 28C54 12 74 8 76 25C90 13 100 29 84 35C101 47 87 62 78 47C72 65 54 59 63 46Z",
+      "M201 22C185 23 183 11 195 11C190 0 203 0 205 11C217 2 225 14 211 18C226 26 216 37 208 26C204 39 189 35 195 26Z",
+      "M291 70C272 72 268 56 283 56C275 41 294 39 297 54C310 44 320 58 304 64C319 74 308 87 300 75C294 90 280 84 285 74Z",
+    ],
+  },
+  {
+    strokes: [
+      "M30 103C97 104 137 73 193 50S279 48 317 22",
+      "M59 110C113 104 150 88 187 68",
+      "M106 51V67M98 59H114",
+    ],
+    accents: [
+      "M317 8L321 18L332 22L321 26L317 37L313 26L302 22L313 18Z",
+      "M192 44L197 51L192 58L187 51Z",
+      "M56 88A3 3 1 1 0 56 94A3 3 0 1 0 56 88Z",
+    ],
+  },
+  {
+    strokes: [
+      "M22 37C73 6 120 26 155 59C183 85 197 91 213 73",
+      "M338 94C286 122 236 103 203 66C177 38 163 33 148 53",
+    ],
+    accents: [
+      "M177 65C143 75 136 37 158 37C178 37 179 77 199 77C222 77 214 42 187 57C163 69 153 95 138 101",
+      "M179 63C196 81 210 92 224 105",
+    ],
+  },
+];
+const wishMotif = computed(
+  () => motifVariants[wishes.value[0]?.id] || motifVariants[0],
+);
+const wishSlider = ref(null);
+const letterOpen = ref(false);
+const envelopeButton = ref(null);
+const letterMotif = ref(null);
+const keepsakePanel = ref(null);
+const reopenButton = ref(null);
+const keepsakeVisible = ref(false);
+const exportStatus = ref("");
+const isSaving = ref(false);
+let letterAnimation;
+let motifAnimation;
+let motifTrigger;
+let keepsakeAnimation;
+
+function cancelMotifAnimation() {
+  motifTrigger?.kill();
+  motifAnimation?.revert();
+  motifTrigger = motifAnimation = null;
+}
+
+function prepareMotif() {
+  cancelMotifAnimation();
+  if (
+    !letterOpen.value ||
+    !letterMotif.value ||
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  )
+    return;
+  motifAnimation = gsap
+    .timeline({ paused: true })
+    .fromTo(
+      letterMotif.value.querySelectorAll(".motif-line"),
+      { drawSVG: "0%" },
+      {
+        drawSVG: "100%",
+        duration: 1.1,
+        stagger: 0.15,
+        ease: "power1.inOut",
+      },
+    )
+    .fromTo(
+      letterMotif.value.querySelectorAll(".motif-accent"),
+      { autoAlpha: 0, scale: 0.2 },
+      {
+        autoAlpha: 1,
+        scale: 1,
+        duration: 0.6,
+        stagger: 0.16,
+        transformOrigin: "50% 50%",
+        ease: "back.out(1.4)",
+      },
+      "-=0.25",
+    );
+}
+
+function revealMotifWhenVisible() {
+  if (!motifAnimation || !letterOpen.value) return;
+  motifTrigger?.kill();
+  motifTrigger = ScrollTrigger.create({
+    trigger: letterMotif.value,
+    start: "top 90%",
+    once: true,
+    animation: motifAnimation,
+  });
+}
+
+watch(
+  () => wishes.value[0]?.id,
+  () => {
+    exportStatus.value = "";
+    prepareMotif();
+    if (!letterAnimation?.isActive()) revealMotifWhenVisible();
+  },
+  { flush: "post" },
+);
+
+function openLetter() {
+  keepsakeAnimation?.kill();
+  keepsakeVisible.value = false;
+  exportStatus.value = "";
+  letterOpen.value = true;
+  envelopeButton.value?.focus({ preventScroll: true });
+}
+
+async function showKeepsake() {
+  keepsakeVisible.value = true;
+  await nextTick();
+  if (letterOpen.value || !keepsakePanel.value) return;
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  keepsakeAnimation?.kill();
+  const focusKeepsake = () => {
+    if (document.activeElement === envelopeButton.value) {
+      reopenButton.value?.focus({ preventScroll: true });
+      keepsakePanel.value?.scrollIntoView({
+        block: "nearest",
+        behavior: reduced ? "instant" : "smooth",
+      });
+    }
+  };
+  if (!reduced) {
+    keepsakeAnimation = gsap.fromTo(
+      keepsakePanel.value,
+      {
+        autoAlpha: 0,
+        rotationX: -70,
+        y: -12,
+        transformOrigin: "50% 0%",
+      },
+      {
+        autoAlpha: 1,
+        rotationX: 0,
+        y: 0,
+        duration: 0.5,
+        ease: "power2.out",
+        clearProps: "opacity,visibility,transform,transformOrigin",
+        onComplete: focusKeepsake,
+      },
+    );
+  } else {
+    gsap.set(keepsakePanel.value, {
+      clearProps: "opacity,visibility,transform,transformOrigin",
+    });
+    focusKeepsake();
+  }
+}
+
+function cancelLetterAnimation() {
+  letterAnimation?.kill();
+  cancelMotifAnimation();
+}
+
+function closeLetter() {
+  letterOpen.value = false;
+  envelopeButton.value?.focus({ preventScroll: true });
+}
+
+function animateLetter(el, done, opening) {
+  cancelLetterAnimation();
+  const flap = envelopeButton.value?.querySelector(".envelope-flap");
+  const lines = el.querySelectorAll(".letter-line");
+  const finish = () => {
+    done();
+    gsap.set([el, ...lines], {
+      clearProps: "opacity,visibility,transform,transformOrigin",
+    });
+    if (opening) revealMotifWhenVisible();
+  };
+  if (!flap) {
+    finish();
+    return;
+  }
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    gsap.set(flap, { rotationX: opening ? 180 : 0 });
+    finish();
+    return;
+  }
+  if (opening) prepareMotif();
+  // Vue 管理展开状态，Timeline 只编排封口、信纸和正文的显现。
+  letterAnimation = gsap.timeline({ onComplete: finish });
+  letterAnimation.to(flap, {
+    rotationX: opening ? 180 : 0,
+    duration: 0.4,
+    ease: "power2.inOut",
+  });
+  if (opening) {
+    letterAnimation
+      .fromTo(
+        el,
+        { autoAlpha: 0, y: 24 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.5,
+          ease: "power2.out",
+        },
+        0.3,
+      )
+      .fromTo(
+        lines,
+        { autoAlpha: 0, y: 12 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.45,
+          stagger: 0.14,
+          ease: "power2.out",
+        },
+        0.6,
+      );
+  } else {
+    letterAnimation
+      .to(lines, { autoAlpha: 0, duration: 0.18 }, 0)
+      .to(
+        el,
+        {
+          rotationX: -85,
+          scaleX: 0.78,
+          scaleY: 480 / Math.max(el.offsetHeight, 480),
+          transformOrigin: "50% 0%",
+          duration: 0.55,
+          ease: "power2.inOut",
+        },
+        0.08,
+      )
+      .to(el, { autoAlpha: 0, duration: 0.12 }, "-=0.12");
+  }
+}
+
+async function saveKeepsake() {
+  if (isSaving.value || !appRef.value) return;
+  isSaving.value = true;
+  exportStatus.value = "saving";
+  // 固定点击时的内容，避免字体加载期间切换语言或祝福影响这次导出。
+  const styles = getComputedStyle(appRef.value);
+  const snapshot = {
+    wish: { ...wishes.value[0] },
+    motif: wishMotif.value,
+    locale: locale.value,
+    title: t("keepsake.title"),
+    date: t("hero.date", dateParams.value),
+    signature: t("message.signature"),
+    greeting: t("footer.subtext"),
+    ink: styles.getPropertyValue("--wish-ink").trim(),
+    accent: styles.getPropertyValue("--wish-accent").trim(),
+  };
+  try {
+    const texts = [
+      snapshot.title,
+      snapshot.date,
+      snapshot.wish.label,
+      snapshot.wish.desc,
+      snapshot.signature,
+      snapshot.greeting,
+    ];
+    await document.fonts.load('400 24px "Noto Serif JP"', texts.join(""));
+    if (!appRef.value) return;
+    const canvas = document.createElement("canvas");
+    canvas.width = 1080;
+    canvas.height = 1440;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("无法创建纪念卡画布");
+    ctx.scale(3, 3);
+    ctx.fillStyle = "#fff2df";
+    ctx.fillRect(0, 0, 360, 480);
+    ctx.strokeStyle = snapshot.ink;
+    ctx.lineWidth = 0.8;
+    ctx.strokeRect(12, 12, 336, 456);
+    ctx.textAlign = "center";
+    const write = (text, y, size, color = snapshot.ink) => {
+      ctx.fillStyle = color;
+      ctx.font = `400 ${size}px "Noto Serif JP", serif`;
+      while (ctx.measureText(text).width > 304 && size > 10) {
+        ctx.font = `400 ${--size}px "Noto Serif JP", serif`;
+      }
+      ctx.fillText(text, 180, y);
+    };
+    write(snapshot.title, 42, 14);
+    write(snapshot.date, 68, 11, "#796578");
+    ctx.save();
+    ctx.translate(24, 100);
+    ctx.scale(312 / 360, 312 / 360);
+    ctx.strokeStyle = snapshot.ink;
+    ctx.fillStyle = snapshot.accent;
+    ctx.lineWidth = 1.8;
+    ctx.lineCap = ctx.lineJoin = "round";
+    snapshot.motif.strokes.forEach(d => ctx.stroke(new Path2D(d)));
+    snapshot.motif.accents.forEach(d => {
+      const path = new Path2D(d);
+      if (snapshot.wish.id !== 2) ctx.fill(path);
+      ctx.stroke(path);
+    });
+    ctx.restore();
+    write(snapshot.wish.label, 246, 25);
+    snapshot.wish.desc
+      .split("\n")
+      .forEach((line, i) => write(line, 290 + i * 25, 15, "#3d3040"));
+    write(snapshot.signature, 382, 20);
+    ctx.beginPath();
+    ctx.moveTo(148, 421);
+    ctx.lineTo(212, 421);
+    ctx.stroke();
+    write(snapshot.greeting, 447, 13);
+    const link = document.createElement("a");
+    link.download = `birthday-wish-${currentYear}-${snapshot.locale}-${snapshot.wish.id}.png`;
+    link.href = canvas.toDataURL("image/png");
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    exportStatus.value = "saved";
+  } catch {
+    exportStatus.value = "error";
+  } finally {
+    isSaving.value = false;
+  }
+}
+
+let wishFlip;
+let isFlipping = false;
+
+async function flipWish() {
+  if (!wishSlider.value || wishes.value.length < 2 || isFlipping) return;
+  isFlipping = true;
+  const state = Flip.getState(wishSlider.value.querySelectorAll(".wish-card"));
+  wishIndex.value = (wishIndex.value + 1) % wishes.value.length;
+  // 等 Vue 按稳定的 key 重排卡片后，再播放位置变化。
+  await nextTick();
+  if (!wishSlider.value) return;
+  wishFlip = Flip.from(state, {
+    targets: wishSlider.value.querySelectorAll(".wish-card"),
+    ease: "sine.inOut",
+    duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      ? 0
+      : 0.4,
+    absolute: true,
+    onComplete: () => {
+      isFlipping = false;
+    },
+  });
+}
 
 const isMobile = ref(false);
 const craneCount = computed(() => (isMobile.value ? 3 : 5));
 const fireworksRef = ref(null);
+const appRef = ref(null);
+let cleanupJourney = () => {};
 
 function checkMobile() {
   isMobile.value = window.innerWidth <= 600;
@@ -235,667 +839,81 @@ onMounted(() => {
       });
       scrollTriggers.push(st);
     });
+
+    const select = gsap.utils.selector(appRef.value);
+    const motion = gsap.matchMedia();
+    motion.add("(prefers-reduced-motion: reduce)", () => {
+      letterAnimation?.progress(1);
+      keepsakeAnimation?.progress(1);
+      cancelMotifAnimation();
+    });
+    motion.add(
+      "(prefers-reduced-motion: no-preference)",
+      () => {
+        let flipCtx;
+        let resizeFrame;
+
+        const createJourney = () => {
+          flipCtx?.revert();
+          flipCtx = gsap.context(() => {
+            const middle = Flip.getState(select(".journey-marker--middle"));
+            const final = Flip.getState(select(".journey-marker--end"));
+            const config = { ease: "none", duration: 1, scale: true };
+            const timeline = gsap.timeline({
+              scrollTrigger: {
+                id: "wish-journey",
+                trigger: select(".wishes-section")[0],
+                start: "clamp(top center)",
+                endTrigger: select(".journey-marker--end")[0],
+                end: "clamp(center center)",
+                scrub: 1,
+              },
+            });
+            timeline
+              .add(Flip.fit(select(".journey-spark")[0], middle, config))
+              .add(
+                Flip.fit(select(".journey-spark")[0], final, config),
+                "+=0.5",
+              );
+            // 重建时直接恢复当前滚动进度，避免从起点再次追赶。
+            timeline.scrollTrigger.refresh();
+            timeline.progress(timeline.scrollTrigger.progress);
+          }, appRef.value);
+        };
+
+        const scheduleJourney = () => {
+          cancelAnimationFrame(resizeFrame);
+          resizeFrame = requestAnimationFrame(createJourney);
+        };
+        // 观察实际布局，涵盖语言、字体与响应式尺寸变化；不观察动画的 transform。
+        const layoutObserver = new ResizeObserver(scheduleJourney);
+        select("section, .birthday-delivery, .footer > .reveal").forEach(el =>
+          layoutObserver.observe(el),
+        );
+        window.addEventListener("resize", scheduleJourney);
+        createJourney();
+
+        return () => {
+          layoutObserver.disconnect();
+          window.removeEventListener("resize", scheduleJourney);
+          cancelAnimationFrame(resizeFrame);
+          flipCtx?.revert();
+        };
+      },
+      appRef.value,
+    );
+    cleanupJourney = () => motion.revert();
   });
 });
 
 onUnmounted(() => {
+  cancelLetterAnimation();
+  keepsakeAnimation?.kill();
+  wishFlip?.kill();
+  cleanupJourney();
   window.removeEventListener("resize", checkMobile);
   ScrollTrigger.getAll().forEach(st => st.kill());
   scrollTriggers = [];
   if (chimeCtx) chimeCtx.close();
 });
 </script>
-
-<style>
-:root {
-  --gold: #f0c27f;
-  --pink: #f5a6c7;
-  --warm: #ffe4c9;
-  --deep: #0a0a1a;
-  --purple: #2d1b4e;
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  background: var(--deep);
-  color: #fff;
-  font-family: "Zen Maru Gothic", "Noto Serif JP", serif;
-  overflow-x: hidden;
-  cursor: default;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-.app {
-  min-height: 100vh;
-  touch-action: pan-y;
-  -webkit-overflow-scrolling: touch;
-}
-
-section {
-  position: relative;
-  z-index: 5;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 20px;
-}
-
-/* Hero */
-.hero {
-  text-align: center;
-  perspective: 800px;
-}
-
-.japanese-pattern {
-  position: absolute;
-  width: 80px;
-  height: 80px;
-  opacity: 0.15;
-  background-image:
-    linear-gradient(45deg, var(--gold) 25%, transparent 25%),
-    linear-gradient(-45deg, var(--gold) 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, var(--gold) 75%),
-    linear-gradient(-45deg, transparent 75%, var(--gold) 75%);
-  background-size: 20px 20px;
-  background-position:
-    0 0,
-    0 10px,
-    10px -10px,
-    -10px 0px;
-}
-
-.japanese-pattern.top-left {
-  top: 15%;
-  left: 10%;
-  animation: rotatePattern 20s linear infinite;
-}
-
-.japanese-pattern.top-right {
-  top: 15%;
-  right: 10%;
-  animation: rotatePattern 20s linear infinite reverse;
-}
-
-@keyframes rotatePattern {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.hero-kanji {
-  font-family: "Noto Serif JP", serif;
-  font-size: clamp(2.5rem, 8vw, 6rem);
-  font-weight: 700;
-  background: linear-gradient(
-    135deg,
-    var(--gold),
-    #fff5e0,
-    var(--pink),
-    var(--gold)
-  );
-  background-size: 300% 300%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: shimmer 4s ease-in-out infinite;
-  filter: drop-shadow(0 0 30px rgba(240, 194, 127, 0.3));
-  letter-spacing: 0.15em;
-  line-height: 1.4;
-}
-
-@keyframes shimmer {
-  0%,
-  100% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-}
-
-.hero-sub {
-  font-size: clamp(1rem, 3vw, 1.6rem);
-  color: rgba(255, 228, 201, 0.7);
-  margin-top: 20px;
-  font-weight: 300;
-  letter-spacing: 0.3em;
-  opacity: 0;
-  animation: fadeUp 1.5s 1s forwards;
-}
-
-.hero-date {
-  font-size: clamp(0.8rem, 2vw, 1rem);
-  color: rgba(255, 228, 201, 0.4);
-  margin-top: 12px;
-  font-weight: 300;
-  letter-spacing: 0.4em;
-  opacity: 0;
-  animation: fadeUp 1.5s 1.3s forwards;
-}
-
-.hero-line {
-  width: 80px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--gold), transparent);
-  margin: 30px auto;
-  opacity: 0;
-  animation: fadeUp 1.5s 1.5s forwards;
-}
-
-.scroll-hint {
-  position: absolute;
-  bottom: 40px;
-  left: 0;
-  right: 0;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  opacity: 0;
-  animation: fadeUp 1.5s 2s forwards;
-}
-.scroll-hint span {
-  font-size: 0.75rem;
-  color: rgba(255, 228, 201, 0.4);
-  letter-spacing: 0.2em;
-}
-.scroll-arrow {
-  width: 20px;
-  height: 20px;
-  border-right: 1px solid rgba(240, 194, 127, 0.4);
-  border-bottom: 1px solid rgba(240, 194, 127, 0.4);
-  transform: rotate(45deg);
-  animation: bounce 2s infinite;
-}
-@keyframes bounce {
-  0%,
-  100% {
-    transform: translateY(0) rotate(45deg);
-  }
-  50% {
-    transform: translateY(8px) rotate(45deg);
-  }
-}
-@keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Cake Section */
-.cake-section {
-  background: radial-gradient(
-    ellipse at 50% 80%,
-    rgba(45, 27, 78, 0.6) 0%,
-    transparent 70%
-  );
-}
-
-/* Message Section */
-.message-section {
-  background: radial-gradient(
-    ellipse at 50% 30%,
-    rgba(45, 27, 78, 0.4) 0%,
-    transparent 70%
-  );
-}
-.message-card {
-  width: 90%;
-  max-width: 900px;
-  padding: 50px 20px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(240, 194, 127, 0.15);
-  border-radius: 24px;
-  backdrop-filter: blur(10px);
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-}
-.message-card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    var(--gold) 20%,
-    var(--pink) 50%,
-    var(--gold) 80%,
-    transparent 100%
-  );
-}
-.message-card::after {
-  content: "❋";
-  position: absolute;
-  bottom: 15px;
-  right: 20px;
-  font-size: 1.2rem;
-  color: rgba(240, 194, 127, 0.2);
-}
-
-.message-card-decoration {
-  position: absolute;
-  top: 15px;
-  left: 20px;
-  font-size: 1.2rem;
-  color: rgba(240, 194, 127, 0.2);
-}
-.message-title {
-  font-family: "Noto Serif JP", serif;
-  font-size: clamp(1.4rem, 4vw, 2rem);
-  font-weight: 500;
-  color: var(--gold);
-  margin-bottom: 30px;
-  letter-spacing: 0.1em;
-}
-.message-text {
-  font-size: clamp(0.95rem, 2.5vw, 1.1rem);
-  line-height: 2.2;
-  color: rgba(255, 228, 201, 0.85);
-  font-weight: 300;
-  letter-spacing: 0.05em;
-}
-.message-text p {
-  margin-bottom: 20px;
-}
-.message-signature {
-  margin-top: 30px;
-  font-size: 0.9rem;
-  color: rgba(245, 166, 199, 0.6);
-  font-style: italic;
-}
-
-/* Wishes */
-.wishes-section {
-  padding: 80px 20px;
-}
-.wishes-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 24px;
-  max-width: 900px;
-  width: 100%;
-}
-.wish-card {
-  padding: 36px 28px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(240, 194, 127, 0.08);
-  border-radius: 20px;
-  text-align: center;
-  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-  position: relative;
-  overflow: hidden;
-}
-.wish-card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(
-    circle at 50% 0%,
-    rgba(240, 194, 127, 0.06) 0%,
-    transparent 60%
-  );
-  opacity: 0;
-  transition: opacity 0.5s;
-}
-.wish-card:hover {
-  transform: translateY(-8px);
-  border-color: rgba(240, 194, 127, 0.25);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-}
-.wish-card:hover::before {
-  opacity: 1;
-}
-.wish-icon {
-  font-size: 2.2rem;
-  margin-bottom: 16px;
-  display: block;
-}
-.wish-label {
-  font-family: "Noto Serif JP", serif;
-  font-size: 1.1rem;
-  color: var(--gold);
-  margin-bottom: 10px;
-  letter-spacing: 0.1em;
-}
-.wish-desc {
-  font-size: 0.85rem;
-  color: rgba(255, 228, 201, 0.5);
-  line-height: 1.8;
-  font-weight: 300;
-}
-
-/* Haiku Section */
-.haiku-section {
-  background: radial-gradient(
-    ellipse at 50% 50%,
-    rgba(45, 27, 78, 0.3) 0%,
-    transparent 70%
-  );
-}
-.haiku-card {
-  width: 85%;
-  max-width: 900px;
-  padding: 60px 40px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(240, 194, 127, 0.1);
-  border-radius: 24px;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-}
-.haiku-kanji {
-  font-family: "Noto Serif JP", serif;
-  font-size: 4rem;
-  color: rgba(240, 194, 127, 0.08);
-  position: absolute;
-  top: 20px;
-  right: 30px;
-  line-height: 1;
-}
-.haiku-title {
-  font-family: "Noto Serif JP", serif;
-  font-size: clamp(1.1rem, 3vw, 1.4rem);
-  color: rgba(240, 194, 127, 0.5);
-  font-weight: 300;
-  letter-spacing: 0.2em;
-  margin-bottom: 40px;
-}
-.haiku-poem {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-.haiku-line {
-  font-family: "Noto Serif JP", serif;
-  font-size: clamp(1.2rem, 3.5vw, 1.6rem);
-  color: rgba(255, 228, 201, 0.85);
-  font-weight: 300;
-  letter-spacing: 0.15em;
-  line-height: 1.8;
-}
-.haiku-divider {
-  width: 40px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--pink), transparent);
-  margin: 40px auto 0;
-}
-
-/* Timeline Section */
-.timeline-section {
-  padding: 100px 20px;
-}
-.timeline-title {
-  font-family: "Noto Serif JP", serif;
-  font-size: clamp(1.4rem, 4vw, 2rem);
-  font-weight: 500;
-  color: var(--gold);
-  margin-bottom: 60px;
-  letter-spacing: 0.15em;
-  text-align: center;
-}
-.timeline {
-  position: relative;
-  max-width: 600px;
-  width: 100%;
-  padding-left: 40px;
-}
-.timeline::before {
-  content: "";
-  position: absolute;
-  left: 8px;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background: linear-gradient(
-    180deg,
-    transparent,
-    rgba(240, 194, 127, 0.3),
-    transparent
-  );
-}
-.timeline-item {
-  position: relative;
-  padding: 0 0 50px 30px;
-}
-.timeline-item:last-child {
-  padding-bottom: 0;
-}
-.timeline-dot {
-  position: absolute;
-  left: -36px;
-  top: 4px;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--gold);
-  box-shadow: 0 0 12px rgba(240, 194, 127, 0.4);
-}
-.timeline-time {
-  font-family: "Noto Serif JP", serif;
-  font-size: 1.3rem;
-  color: var(--pink);
-  letter-spacing: 0.2em;
-  margin-bottom: 8px;
-}
-.timeline-text {
-  font-size: clamp(0.9rem, 2.5vw, 1.05rem);
-  color: rgba(255, 228, 201, 0.65);
-  font-weight: 300;
-  letter-spacing: 0.08em;
-  line-height: 1.8;
-}
-
-/* Footer */
-.footer {
-  min-height: 50vh;
-  text-align: center;
-}
-.footer-text {
-  font-family: "Noto Serif JP", serif;
-  font-size: clamp(1.8rem, 5vw, 3rem);
-  background: linear-gradient(135deg, var(--pink), var(--gold));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  letter-spacing: 0.15em;
-  line-height: 1.6;
-}
-.footer-sub {
-  font-size: 0.6em;
-  opacity: 0.7;
-}
-.footer-year {
-  margin-top: 20px;
-  font-size: 0.85rem;
-  color: rgba(255, 228, 201, 0.3);
-  letter-spacing: 0.3em;
-}
-
-/* Reveal */
-.reveal {
-  opacity: 0;
-  transform: translateY(40px);
-  transition: all 1s cubic-bezier(0.23, 1, 0.32, 1);
-}
-.reveal.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .japanese-pattern {
-    width: 50px;
-    height: 50px;
-  }
-  .japanese-pattern.top-left {
-    top: 10%;
-    left: 5%;
-  }
-  .japanese-pattern.top-right {
-    top: 10%;
-    right: 5%;
-  }
-}
-
-@media (max-width: 600px) {
-  section {
-    min-height: auto;
-    padding: 50px 16px;
-  }
-
-  section.hero {
-    min-height: 85vh;
-    padding: 60px 16px;
-  }
-
-  .message-card {
-    padding: 36px 24px;
-  }
-
-  .wishes-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-
-  .wish-card {
-    padding: 28px 20px;
-  }
-
-  .japanese-pattern {
-    width: 40px;
-    height: 40px;
-    opacity: 0.1;
-  }
-
-  .hero-sub {
-    letter-spacing: 0.15em;
-  }
-
-  .message-text {
-    line-height: 2;
-  }
-
-  .footer-text {
-    font-size: clamp(1.5rem, 6vw, 2.5rem);
-  }
-
-  .lang-switcher {
-    top: 16px;
-    right: 16px;
-  }
-
-  .lang-switcher button {
-    padding: 5px 10px;
-    font-size: 0.7rem;
-  }
-
-  .haiku-card {
-    padding: 36px 24px;
-  }
-
-  .haiku-kanji {
-    font-size: 2.5rem;
-    top: 12px;
-    right: 16px;
-  }
-
-  .haiku-title {
-    font-size: 1rem;
-    margin-bottom: 28px;
-  }
-
-  .haiku-line {
-    font-size: 1.05rem;
-  }
-
-  .haiku-poem {
-    gap: 14px;
-  }
-
-  .haiku-divider {
-    margin-top: 28px;
-  }
-
-  .timeline-section {
-    padding: 50px 16px;
-  }
-
-  .timeline {
-    padding-left: 28px;
-  }
-
-  .timeline-dot {
-    left: -24px;
-    width: 8px;
-    height: 8px;
-  }
-
-  .timeline-item {
-    padding-left: 18px;
-    padding-bottom: 30px;
-  }
-
-  .timeline-title {
-    margin-bottom: 32px;
-    font-size: 1.3rem;
-  }
-
-  .timeline-time {
-    font-size: 1.1rem;
-  }
-
-  .timeline-text {
-    font-size: 0.9rem;
-  }
-
-  .cake-section {
-    padding: 40px 16px;
-  }
-}
-
-@media (max-width: 380px) {
-  .hero-kanji {
-    font-size: clamp(2rem, 10vw, 3rem);
-  }
-
-  .message-card {
-    padding: 28px 20px;
-  }
-
-  .message-title {
-    font-size: 1.3rem;
-  }
-
-  .message-text {
-    font-size: 0.9rem;
-  }
-}
-</style>

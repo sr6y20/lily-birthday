@@ -99,6 +99,7 @@ function blowCandle(index) {
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
+  z-index: 1;
 }
 .plate {
   width: 260px;
@@ -193,6 +194,7 @@ function blowCandle(index) {
   transform: translateX(-50%);
   display: flex;
   gap: 20px;
+  z-index: 2;
 }
 .candle {
   width: 8px;
@@ -202,6 +204,14 @@ function blowCandle(index) {
   position: relative;
   cursor: pointer;
   transition: all 0.3s;
+}
+.candle::before {
+  content: "";
+  position: absolute;
+  top: -20px;
+  left: -16px;
+  right: -16px;
+  bottom: -10px;
 }
 .candle:hover {
   filter: brightness(1.1);
@@ -294,6 +304,20 @@ function blowCandle(index) {
     transform: scale(0.85);
     margin-bottom: 30px;
   }
+  .cake-glow {
+    animation: none;
+    opacity: 0.4;
+  }
+  .flame {
+    width: 16px;
+    height: 26px;
+  }
+  .flame::after {
+    width: 38px;
+    height: 38px;
+    top: -6px;
+    left: -11px;
+  }
 }
 
 @media (max-width: 600px) {
@@ -301,11 +325,33 @@ function blowCandle(index) {
     transform: scale(0.7);
     margin-bottom: 20px;
   }
+  .cake-glow {
+    width: 200px;
+    height: 200px;
+    animation: none;
+    opacity: 0.3;
+  }
+  .flame {
+    width: 18px;
+    height: 28px;
+    filter: brightness(1.3);
+  }
+  .flame::after {
+    width: 42px;
+    height: 42px;
+    top: -7px;
+    left: -12px;
+  }
 }
 
 @media (max-width: 380px) {
   .cake-wrapper {
     transform: scale(0.6);
+  }
+  .flame {
+    width: 20px;
+    height: 30px;
+    filter: brightness(1.4);
   }
 }
 </style>
