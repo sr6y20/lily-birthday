@@ -2,7 +2,7 @@
   "hero": {
     "title": "お誕生日\nおめでとう",
     "subtitle": "Happy Birthday to You",
-    "date": "令和八年・秋"
+    "date": "令和{year}年・二月二十六日"
   },
   "message": {
     "title": "心からの祝福",
@@ -29,10 +29,10 @@
     }
   ],
   "haiku": {
-    "title": "秋の誕生日に",
-    "line1": "紅葉舞い散る",
-    "line2": "あなたの笑顔輝く",
-    "line3": "幸せの季節"
+    "title": "冬の誕生日",
+    "line1": "梅の蕾み",
+    "line2": "あなたの笑顔は春風",
+    "line3": "冬を温もりに"
   },
   "timeline": {
     "title": "特別な瞬間",

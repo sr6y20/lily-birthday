@@ -2,7 +2,7 @@
   "hero": {
     "title": "生日快乐",
     "subtitle": "Happy Birthday to You",
-    "date": "令和八年·秋"
+    "date": "令和{year}年·二月二十六日"
   },
   "message": {
     "title": "由衷的祝福",
@@ -17,10 +17,10 @@
     { "icon": "🌙", "label": "美好相遇", "desc": "愿与美好的人\n结下更多缘分" }
   ],
   "haiku": {
-    "title": "秋日生日",
-    "line1": "红叶舞飘落",
-    "line2": "你的笑容闪耀",
-    "line3": "幸福的季节"
+    "title": "冬日生日",
+    "line1": "梅花含苞待放",
+    "line2": "你的笑容如春风",
+    "line3": "温暖了寒冬"
   },
   "timeline": {
     "title": "特别的时刻",

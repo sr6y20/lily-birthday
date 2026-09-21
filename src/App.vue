@@ -32,7 +32,7 @@
       <div class="japanese-pattern top-right"></div>
       <h1 class="hero-kanji" v-html="nl2br(t('hero.title'))"></h1>
       <p class="hero-sub">{{ t("hero.subtitle") }}</p>
-      <p class="hero-date">{{ t("hero.date") }}</p>
+      <p class="hero-date">{{ t("hero.date", { year: reiwaYear }) }}</p>
       <div class="hero-line"></div>
       <div class="scroll-hint">
         <span>SCROLL</span>
@@ -101,7 +101,7 @@
           {{ t("footer.text") }}<br />
           <span class="footer-sub">{{ t("footer.subtext") }}</span>
         </div>
-        <div class="footer-year">REIWA · 2026</div>
+        <div class="footer-year">REIWA · {{ currentYear }}</div>
       </div>
     </section>
 
@@ -137,6 +137,8 @@ gsap.registerPlugin(ScrollTrigger);
 
 const { t, tm } = useI18n();
 
+const currentYear = new Date().getFullYear();
+const reiwaYear = currentYear - 2018;
 const wishes = computed(() => tm("wishes"));
 
 const isMobile = ref(false);

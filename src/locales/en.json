@@ -2,7 +2,7 @@
   "hero": {
     "title": "Happy\nBirthday",
     "subtitle": "Wishing you a wonderful day",
-    "date": "Reiwa 8 · Autumn"
+    "date": "Reiwa {year} · February 26"
   },
   "message": {
     "title": "Heartfelt Wishes",
@@ -29,10 +29,10 @@
     }
   ],
   "haiku": {
-    "title": "Autumn Birthday",
-    "line1": "Leaves dance and fall",
-    "line2": "Your smile shines bright",
-    "line3": "Season of joy"
+    "title": "Winter Birthday",
+    "line1": "Plum blossoms await",
+    "line2": "Your smile like spring breeze",
+    "line3": "Warming the cold"
   },
   "timeline": {
     "title": "Special Moments",
